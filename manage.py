@@ -10,8 +10,7 @@ import sys
 from bs4 import BeautifulSoup
 from seleniumrequests import Chrome
 from selenium import webdriver
-from datetime import datetime  
-from datetime import timedelta
+from datetime import datetime,date,timedelta  
 import time
 import random
 from random import randint
@@ -105,7 +104,9 @@ def add_2hr(sdate,format='%d.%m.%Y',limit=2):
     startdate = date + timedelta(hours=slimit)
     enddate = date + timedelta(hours=slimit+limit)
     return random_date(str(startdate), str(enddate), sformat, sformat)
- 
+
+def yesterday():
+  return (datetime.today() - timedelta(days = 1,hours=random.randint(1,48),minutes=random.randint(1,60))).strftime('%d-%m-%Y %H:%M:%S')
 sformat = '%Y-%m-%d %H:%M:%S'
 eformat = '%d-%m-%Y %H:%M:%S'
  
