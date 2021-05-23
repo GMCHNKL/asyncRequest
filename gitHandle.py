@@ -9,6 +9,7 @@
 
 import os
 from datetime import datetime
+os.system('cd C:\\Users\\Hp\\Documents\\heroku\\ICMRinsert')
 os.system('git remote add origin git@github.com:GMCHNKL/asyncRequest.git')
 os.system('git status')
 os.system('git add .')
