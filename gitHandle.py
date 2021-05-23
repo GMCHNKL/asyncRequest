@@ -9,8 +9,8 @@
 
 import os
 from datetime import datetime
-os.system('git remote -v git@github.com:GMCHNKL/asyncRequest.git')
+os.system('git remote add git@github.com:GMCHNKL/asyncRequest.git')
 os.system('git add .')
 os.system('git commit -m "file saveed on '+str(datetime.now())+'"')
-os.system('git push')
+os.system('git push origin main')
 
