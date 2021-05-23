@@ -13,5 +13,6 @@ os.system('git remote add origin git@github.com:GMCHNKL/asyncRequest.git')
 os.system('git status')
 os.system('git add .')
 os.system('git commit -m "file saveed on '+str(datetime.now())+'"')
+print('Git Push')
 os.system('git push origin main')
 
