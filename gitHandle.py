@@ -15,5 +15,5 @@ os.system('git status')
 os.system('git add .')
 os.system('git commit -m "file saveed on '+str(datetime.now())+'"')
 os.system('git push origin main')
-
+print('Git pushed')
 
