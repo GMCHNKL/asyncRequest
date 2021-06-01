@@ -5,7 +5,7 @@ from os import path
 from os import listdir
 from os.path import isfile, join
 from manageDates import ManageDates
-
+from basedir import BaseDir
 
 class FileData:
 	start = -1
@@ -14,7 +14,7 @@ class FileData:
 	issrf = ''
 	date = ''
 	def __init__(self, sdate=None, edate=None, path='DataFolder',filenames=None, start=0, end=-1, issrf='', sufix=''):
-		self.path = path
+		self.path = BaseDir+path
 		self.validFileName()
 		filearr = self.getFiles()
 		filearr.sort()

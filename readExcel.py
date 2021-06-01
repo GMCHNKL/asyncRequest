@@ -6,7 +6,7 @@ from datetime import datetime
 import traceback
 import re
 import os
-
+from basedir import BaseDir
 
 class ReadExcel:
 	df = pd.DataFrame()
@@ -38,7 +38,7 @@ class ReadExcel:
 		self.results = results
 		self.page = page
 		self.dflist = []
-		self.processedDataPath = 'DataFolder\\Processed'
+		self.processedDataPath = BaseDir+'DataFolder\\Processed'
 
 	def getSlice(self, fd, df):
 		start, end = fd.start, fd.end

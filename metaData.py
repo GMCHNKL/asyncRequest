@@ -1,5 +1,4 @@
 from datetime import datetime
-from os import path
 from readExcel import ReadExcel
 from covidData import CovidData
 from fileData import FileData
