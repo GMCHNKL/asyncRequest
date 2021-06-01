@@ -1,9 +1,9 @@
 import random
 import traceback
-from manage import *
 import re
 from manageDates import ManageDates
 from util import *
+import random
 
 # print(isnull('naN'))
 def isnull(value):
@@ -41,6 +41,12 @@ def removePunctuations(value,replacewith=''):
 		if x in marks:
 			value = value.replace(x, replacewith)
 	return value
+
+# Random mobile no.
+def rand_ndigits(n=9):
+    range_start = 10**(n-1)
+    range_end = (10**n)-1
+    return random.randint(range_start, range_end)
 
 def getrandnamelist():
 	return ['SATHYA(IP/LW)', 'palaniammal', 'muthusamy', 'dharneshwaran', 'SUBIKSA', 'VISHWANATHAN', 'GOVIMDASAMY', 'LAKSHMANAN', 'KIRIJAKUMARI', 'PERUMAYEE', 'ELANGO', 'JAYAMANI', 'KRISHNAMOORTHY', 'VEERAMMAL', 'DHANASEKARAN', 'SUGUNTH', 'BALAJI', 'MASILAMANI', 
