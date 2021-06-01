@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 import asyncio
-import time
 import aiohttp
 import traceback
 from util import *
@@ -378,7 +377,7 @@ class IcmrData:
 			loop = asyncio.new_event_loop()
 		else:
 			nest_asyncio.apply()
-			
+
 		if process=='main':
 			loop.run_until_complete(asyncio.wait([self.main()]))
 			self.display_results()
