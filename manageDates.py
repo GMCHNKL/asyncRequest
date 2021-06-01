@@ -8,7 +8,7 @@ class ManageDates:
     date = ''
     def __init__(self,sdate=None):
         self.format = '%d-%m-%Y %H:%M:%S'
-        self.cformat = '%d-%m-%Y'
+        self.cformat = '%d.%m.%Y'
         self.date = self.setDate(sdate)
 
     def setDate(self,sdate=None):
@@ -18,7 +18,9 @@ class ManageDates:
                 if self.isstd(sdate):
                     return sdate
                 return self.mk_std(sdate)
-        print(sdate,"is Invalid date so today date is taken")
+            else:
+                return None
+        # print(sdate,"is Invalid date so today date is taken")
         return self.mk_std((datetime.today()).strftime(self.format))
 
     def assignDate(self,sdate=None): #assignDate assign self.date or set given date
@@ -28,6 +30,8 @@ class ManageDates:
         return re.search(r'^\d{2}\-\d{2}\-\d{4} (:?\d{1,2}){3}$',sdate)
 
     def isdate(self,sdate):
+        if not sdate or not isinstance(sdate,str):
+            return None
         return re.search(r'^(\d{1,2}|\d{4})([.\-/]){1}\d{1,2}([.\-/]){1}(\d{1,2}|\d{4}) ?(\d{1,2}:?)*$',sdate)
 
     def datetimeobj(self,sdate):
@@ -67,19 +71,21 @@ class ManageDates:
         end = self.setDate(end) #set given date or today date
         return self.str_time_prop(start, end ,random.random())
     
-    def addhours(self,sdate=None,hours=0, rand_hr=1):
+    def addhours(self,sdate=None,hours=0, rand_hr=1,slimit=None):
         sdate = self.datetimeobj(self.assignDate(sdate))
-        slimit = 9 if int(sdate.strftime('%H'))<9 else 0  # statr by 9 AM
+        if not slimit:
+            slimit = 9 if int(sdate.strftime('%H'))<9 else 0  # statr by 9 AM
         slimit += hours
         startdate = sdate + timedelta(hours=slimit)
         enddate = sdate + timedelta(hours=slimit+rand_hr)
         return self.random_date(self.setDate(startdate), self.setDate(enddate))
 
-    def addbyday(self,today=False,days=1):
+    def addbyday(self,sdate=None,today=False,days=1):
+        sdate = self.assignDate(sdate)
         if today:
             sdate = date.today()
         else:
-            sdate = datetime.strptime(self.date, self.format)
+            sdate = datetime.strptime(sdate, self.format)
         return (sdate + timedelta(days = days)).strftime(self.format)
 
     def yesterday(self):

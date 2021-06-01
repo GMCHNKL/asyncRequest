@@ -1,7 +1,9 @@
 import random
+import traceback
 from manage import *
 import re
-import string
+from manageDates import ManageDates
+from util import *
 
 # print(isnull('naN'))
 def isnull(value):
@@ -33,7 +35,7 @@ def isdigit(value):
 	return True
 
 def removePunctuations(value,replacewith=''):
-	marks = '''!()-[]\{\};?@#$%:'"\.^&*_\n\t'''
+	marks = '''!()-[]\{\};?@#$%:'"\.^&*_\n\t '''
 	value = str(value).lower()
 	for x in value:
 		if x in marks:
@@ -50,28 +52,32 @@ def getrandnamelist():
 'MADHAVAN', 'GOAPALRAM BIRDA', 'KOVALAN', 'DR M SARANYA', 'BANUPRIYA', 'VINITHA']
 
 class CovidData:
-	patient_name = ''
-	patient_id = ''
-	sample_id = ''
-	age = ''
-	gender = ''
-	contact_number = ''
-	address = ''
-	final_result_of_sample = 'negative'
-	srf_id = ''
-	sample_cdate = ''
-	sample_rdate = ''
-	sample_tdate = ''
-	record_id = ''
-	clinical_data_id = ''
-	
+	alldata = {
+			'patient_name' : '','patient_id' : '','sample_id' : '','age' : '','gender' : '','contact_number' : '','address' : '','final_result_of_sample' : 'negative','srf_id' : '','sample_cdate' : '','sample_rdate' : '','sample_tdate' : '','record_id' : '','clinical_data_id' : '',	'community_hospital': 'hospital', 'age_in': 'Years', 'contact_number_belongs_to': 'patient',
+			'nationality': 'India', 'state': '33', 'district': '580', 'hospitalized': 'No', 'mode_of_transport': 'Walk', 'testing_kit_used': 'LabGun-tm_ExoFast',
+			'repeat_sample': 'No', 'otp_verified_srf': 'S', 'patient_occupation': 'OTHER', 'aarogya_setu_app_downloaded': 'No', 'contact_with_lab_confirmed_patient': 'No',
+			'patient_category': 'NCat18', 'sample_type': 'Nasopharyngeal_Oropharyngeal', 'status': 'Asymptomatic', 'sample_collected_from': 'Non-containment area',
+			'covid19_result_egene': '',
+			'rdrp_confirmatory': '','page':'add_record',
+		}
 	def __init__(self,datadict={},page='add_record'):
 		self.dd = datadict
-		self.page = page
+		self.alldata['page'] = page
+		self.isvalid = True
+		self.importdata(dd=self.alldata,validate=False)
 		if len(datadict):
-			self.importdata()
+			self.importdata(dd=datadict)
 			self.assign_validate()
-
+	def exception_validate(func):
+		def wrapper(self,**kargs):
+			try:
+				func(self,**kargs)
+			except Exception:
+				self.isvalid = False
+				traceback.print_exc()
+		return wrapper
+	
+	@exception_validate
 	def assign_validate(self):
 		self.validatePid()
 		self.validateName()
@@ -83,30 +89,19 @@ class CovidData:
 		self.assignResult()
 		self.assignDate()
 
-	def importdata(self,dd=''):
+	@exception_validate
+	def importdata(self,dd='',validate=True):
 		if dd=='':
 			dd = self.dd
-		if dd['patient_id']:
-			self.patient_id = dd['patient_id']
-			self.sample_id = dd['patient_id']
-		if dd['sample_cdate']:
-			self.sample_cdate = dd['sample_cdate']
-		if dd['patient_name']:
-			self.patient_name = dd['patient_name']
-		if dd['age']:
-			self.age = dd['age']
-		if dd['gender']:
-			self.gender = dd['gender']
-		if dd['contact_number']:
-			self.contact_number = dd['contact_number']
-		if dd['age']:
-			self.age = dd['age']
-		if dd['address']:
-			self.address = dd['address']
-		if dd['srf_id']:
-			self.srf_id = dd['srf_id']
-		if dd['final_result_of_sample']:
-			self.final_result_of_sample = dd['final_result_of_sample']
+		if validate:
+			if isnull(dd['patient_id']) or isnull(dd['final_result_of_sample']):
+				raise Exception 
+			else:
+				dd['sample_id'] = dd['patient_id']
+				dd['covid19_result_egene'] = dd['final_result_of_sample']
+				dd['rdrp_confirmatory'] = dd['final_result_of_sample']
+		for key,value in dd.items():
+			setattr(self,key,value)
 		return self
 		
 	def isPid(self,pid):
@@ -114,28 +109,28 @@ class CovidData:
 			r'^(c\d{6})\w*',
 			str(pid).strip().lower()
 		)
+
+
 	def validatePid(self):
-		pid = removePunctuations(self.patient_id) 
-		if not self.isPid(pid):
-			abc = string.ascii_letters.upper()
-			pid = 'C'+ str(rand_ndigits(6))+random.choice(abc)+random.choice(abc)
-		pid = pid[0].upper()+pid[1:]
+		pid = removePunctuations(self.patient_id)
+		if isnull(pid):
+			raise Exception
+		pid = pid.upper()
 		self.patient_id = pid
-		self.sample_id = pid
 		return pid
 
 	def validateName(self):
 		name = self.patient_name
 		if isnull(name):
 			name = random.choice(getrandnamelist())
-		name = removePunctuations(name)
+		name = removePunctuations(name,' ')
 		if comparelen(name, 'lt', 4):
 			name = name+'    '
-		self.patient_name = name
+		self.patient_name = name.upper()
 		return name
 
 	def validateAge(self):
-		rand = random.randrange(35, 65)
+		rand = random.randint(35, 65)
 		age = removePunctuations(self.age)
 		if isnull(age) or not isdigit(age):
 			age = rand
@@ -154,59 +149,59 @@ class CovidData:
 
 	def validateNumber(self):
 		contact_number = removePunctuations(self.contact_number)
-		if comparelen(contact_number, 'lt', 10) or isnull(contact_number) or isdigit(contact_number):
+		if comparelen(contact_number, 'lt', 10) or isnull(contact_number) or not isdigit(contact_number):
 			contact_number = '9'+str(rand_ndigits(9))
 		self.contact_number = contact_number
 		return contact_number
 
 	def validateAddress(self):
-		address = removePunctuations(self.address)
+		address = str(self.address).upper()
 		if isnull(address):
 			address = 'Namakkal NKL'
-		self.address = address
+		self.address = address.upper()
 		return address
 
 	def validateSrf(self):
 		srf = removePunctuations(self.srf_id)
-		if isnull(srf) or isdigit(srf):
+		if isnull(srf) or not isinstance(srf,int):
 			self.srf_id = ''
 			return ''
 		n = int(srf)
-		if comparelen(srf, 'lt', 13):
+		if comparelen(srf, 'lte', 13):
 			prefix = 3358000000000
 			if n+prefix < 3359000000000:
 				srf = n+prefix
 		else: srf = ''
 		self.srf_id = srf
 		return srf
-
-	def validateCdate(self):
-		cdate = self.sample_cdate
-		if comparelen(cdate, 'eq', 10):
-			cdate = add_2hr(cdate)
-		elif comparelen(cdate, 'eq', 8):
-			cdate = add_2hr(cdate, '%d.%m.%y')
-		else:
-			cdate = yesterday()
-		self.sample_cdate = cdate
-		return cdate
+	
 
 	def assignDate(self):
-		cdate = self.validateCdate()
-		frmt = '%d-%m-%Y %H:%M:%S'
-		rdate = add_2hr(cdate, frmt)
-		tdate = upto_today_random(add_2hr(rdate, frmt))
-		self.sample_cdate,self.sample_rdate,self.sample_tdate = cdate, rdate, tdate
+		md = ManageDates()
+		cdate = self.sample_cdate
+		if not md.isdate(cdate):
+			self.isvalid = False
+		cdate = md.addhours(cdate,hours=random.randint(1,6))
+		rdate = md.addhours(cdate,hours=3)
+		tdate = self.sample_tdate
+		if isnull(tdate) or not md.isdate(tdate) or md.coustomFormat(cdate)==md.coustomFormat(tdate):
+			tdate = md.addhours(rdate,hours=3)
+		else:
+			tdate = md.addhours(tdate,hours=random.randint(1,6))
+		self.sample_cdate = cdate
+		self.sample_rdate = rdate
+		self.sample_tdate = tdate
 		return cdate, rdate, tdate
+
 
 	def assignResult(self):
 		value = removePunctuations(self.final_result_of_sample)
 		if isnull(value):
 			return 'negative'
 		reslist = {
-			'negative': ['negative'],
-			'positive': ['positive'],
-			'rejected': ['rejecte', 'resample']
+			'Negative': ['negative'],
+			'Positive': ['positive'],
+			'Sample Rejected': ['rejecte', 'resample']
 		}
 		# print(value)
 		for res, alternatives in reslist.items():
@@ -214,38 +209,33 @@ class CovidData:
 				if value.find(alt) >= 0:
 					self.final_result_of_sample = res
 					return res
-		self.final_result_of_sample = 'negative'
-		return 'negative'
+		self.isvalid = False
+		return None
 
+	@separator
+	def prittydata(self):
+		for key,value in self.needData().items():
+			print(key,':',value)
+	
+	def needData(self):
+		needlist = ['patient_name','patient_id','sample_id','age','gender','contact_number','address','final_result_of_sample','srf_id','sample_cdate','sample_rdate','sample_tdate','page','record_id','clinical_data_id']
+		datadict = self.__dict__
+		return {key:datadict[key] for key in needlist}
 
 	def getdatadict(self):
-		return {
-			'patient_name': self.patient_name,
-			'patient_id': self.patient_id,
-			'sample_id': self.sample_id,
-			'age': self.age,
-			'gender': self.gender,
-			'contact_number': self.contact_number,
-			'address': self.address,
-			'final_result_of_sample': self.final_result_of_sample,
-			'srf_id': self.srf_id,
-			'sample_cdate': self.sample_cdate,
-			'sample_rdate': self.sample_rdate,
-			'sample_tdate': self.sample_tdate,
-			'page' : self.page,
-			'record_id' : self.record_id,
-			'clinical_data_id' : self.clinical_data_id,
-			'community_hospital': 'hospital', 'age_in': 'Years', 'contact_number_belongs_to': 'patient',
-			'nationality': 'India', 'state': '33', 'district': '580', 'hospitalized': 'No', 'mode_of_transport': 'Walk', 'testing_kit_used': 'LabGun-tm_ExoFast',
-			'repeat_sample': 'No', 'otp_verified_srf': 'S', 'patient_occupation': 'OTHER', 'aarogya_setu_app_downloaded': 'No', 'contact_with_lab_confirmed_patient': 'No',
-			'patient_category': 'NCat18', 'sample_type': 'Nasopharyngeal_Oropharyngeal', 'status': 'Asymptomatic', 'sample_collected_from': 'Non-containment area',
-			'covid19_result_egene': self.final_result_of_sample,
-			'rdrp_confirmatory': self.final_result_of_sample,
-		}
-
+		if not self.isvalid:
+			return None
+		datadict = self.__dict__
+		return {key : datadict[key] for key in self.alldata.keys()}
+		
+		
+		
 if __name__ == '__main__':
-	p1 = CovidData()
+	
+	p1 = CovidData(datadict={'patient_id':'C147586','sample_cdate':'3.5.2021',
+	'sample_tdate':'4.5.21','final_result_of_sample':'Negative'},page= 'edit')
 	# read = ReadExcel()
 	# read.getList('NAME ')
-	print(p1.assign_validate())
-	print(p1.getdatadict())
+	print('rdrp_confirmatory:',p1.rdrp_confirmatory)
+	p1.prittydata()
+	# print(p1.getdatadict())

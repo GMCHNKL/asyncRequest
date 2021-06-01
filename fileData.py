@@ -8,37 +8,80 @@ from manageDates import ManageDates
 
 
 class FileData:
-	path = 'DataFolder'
 	start = -1
 	end = -1
 	sufix = ''
 	issrf = ''
 	date = ''
-	def __init__(self, sdate=None,edate=None, days=0, path='DataFolder',filenames=[], start=0, end=-1, issrf='', sufix=''):
-		self.filenames = filenames
-		self.md = ManageDates(sdate)
-		if not sdate:
-			try:
-				if len(filenames):
-					_,self.md.date= self.string_date(filenames[0])
-				else:
-					_,self.md.date= self.string_date(self.getFiles()[0])
-				self.md.date = self.md.setDate(self.md.date)
-			except:
-				self.md.date = self.md.yesterday()
-
-		self.datelist = self.md.daterange(
-			start=sdate,
-			end=edate
-		)
-		print('date taken :',self.md.date)
+	def __init__(self, sdate=None, edate=None, path='DataFolder',filenames=None, start=0, end=-1, issrf='', sufix=''):
 		self.path = path
+		self.validFileName()
+		filearr = self.getFiles()
+		filearr.sort()
+		constrain = {'first':[filearr[0]],'end':[filearr[-1]],'all':filearr}
+		self.filenames = []
+		self.datelist = []
+		if str(sdate) in list(constrain.keys()):
+			filenames = constrain[sdate]
+		if filenames:
+			if isinstance(filenames,str):
+				if filenames in list(constrain.keys()):
+					filenames = constrain[filenames]
+				else:
+					filenames = self.getFileName(filenames)
+			for fname in filenames:
+				self.filenames.append(self.getFileName(fname))
+		print(self.filenames)
+		if len(self.filenames)==0:
+			if isinstance(sdate,str):
+				if sdate and edate:
+					sdate = self.assignDates(sdate,edate)
+				else:
+					sdate = [self.assignDates(sdate,edate)]
+					print("sdate Only :",sdate)
+			for date in sdate:
+				self.datelist.append(self.assignDates(date))
+		if not self.setFileNames():
+			print("No Data Found in the given directory",self.path,"Nothing to Do please check date and filename in  the specified folder")
+
 		self.start = start-1
 		self.end = end
 		self.sufix = sufix
 		self.issrf = issrf
-		self.validFileName()
-		self.setFileNames()
+		
+		
+
+	def join(self,fname):
+		return join(self.path,fname)
+
+	def getFileName(self,fname):
+		filearr = self.getFiles()
+		print(fname)
+		for file in filearr:
+			if fname.find(file)>=0:
+				return fname
+		if isinstance(fname,int):
+			if fname<=len(filearr) and fname>=1:
+				return filearr[fname-1]
+			print("Given int value is out of range in the given directory")
+			return ''
+		print('Given file name is not valid')
+		return ''
+		
+
+	def assignDates(self,sdate,edate=None):
+		md = ManageDates(sdate)
+		dates = [md.isdate(sdate),md.isdate(edate)]
+		formatdate = [md.coustomFormat(sdate),md.coustomFormat(edate)]
+		if all(dates):
+			return md.daterange(formatdate[0],formatdate[1])
+		elif dates[0]:
+			return formatdate[0]
+		elif dates[1]:
+			return formatdate[1]
+		print('Provided Dates or Invalid')
+		return ''
+
 
 	def checkfn(self,fname):
 		return re.search(
@@ -64,37 +107,42 @@ class FileData:
 		mypath = self.path
 		for file in self.getFiles():
 			fdate,mdate = self.string_date(file)
-			rename = file.replace(fdate,mdate)
-			os.rename(join(mypath, file), join(mypath, rename))
+			if fdate!=mdate:
+				rename = file.replace(fdate,mdate)
+				os.rename(join(mypath, file), join(mypath, rename))
 
 	def setFileNames(self):
 		filelist = self.getFiles()
-		if not len(self.filenames):
+		if len(self.filenames)==0:
+			print('Selecting by dates:')
 			datelist=  self.datelist
 			self.datelist = []
 			for f in filelist:
 				for d in datelist:
 					if f.find(d)>=0:
-						self.filenames.append(self.path+'/'+f)
+						self.filenames.append(f)
 						self.datelist.append(d)
 			if len(self.datelist)==0:
 				print('No files where selected')
+				return False
+			return True
 		else:
 			filenames = self.filenames
 			self.filenames = []
 			for f in filenames:
-				if f in filelist or (self.path+'/'+f) in filelist:
-					self.filenames.append(f.replace(f,(self.path+'/'+f)))
+				for fl in filelist:
+					if f!='' and f.find(fl)>=0:
+						self.filenames.append(f)
 			if len(self.filenames)==0:
 				print('No files where selected')
-		return self
+				return False
+		return True
 
 	
 
 
 if __name__ == '__main__':
-	fd = FileData('11.5.21')
-
+	fd = FileData('27.5.21',path='DataFolder\\May 1 to 27')
 	print(fd.date)
 	print(fd.filenames)
 	
