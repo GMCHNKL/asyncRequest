@@ -5,6 +5,7 @@ import time
 import aiohttp
 import traceback
 from util import *
+import nest_asyncio
 
 class IcmrData:
 	already_exist = 0
@@ -360,28 +361,6 @@ class IcmrData:
 			# print(self.datalist)
 			self.record_data['rec_not_collected'] = []
 
-		
-		# async with aiohttp.ClientSession() as s:
-		# 	self.session = s
-		# 	await self.asynclogin()
-		# 	await self.collect_record_id()
-		# 	count = len(self.record_data['rec_not_collected'])
-		# 	print('rec_not_collected :',count)
-		# 	self.datalist = self.record_data['rec_not_collected']
-		# 	self.record_data['rec_not_collected'] = []
-		# 	print('datalist :',self.datalist)
-		# 	self.mastedatalist.append(self.datalist)
-		# while self.record_data['precount']!=count:
-		# 	async with aiohttp.ClientSession() as s:
-		# 		self.session = s
-		# 		await self.asynclogin()
-		# 		await self.collect_record_id()
-		# 		self.mastedatalist.append(self.datalist)
-		# 		self.record_data['precount'] = count
-		# 		self.datalist = self.record_data['rec_not_collected']
-		# 		self.record_data['rec_not_collected'] = []
-		# 		print('rec_not_collected :',count)
-		# 		print('datalist :',self.datalist)
 		self.datalist = self.record_data['rec_collected']
 		for data in self.record_data['rec_not_collected']:
 			self.datalist.append(data)
@@ -393,7 +372,13 @@ class IcmrData:
 		if len(datalist):
 			self.datalist = datalist
 		
-		loop = asyncio.get_event_loop()
+		try:
+			loop = asyncio.get_event_loop()
+		except RuntimeError:
+			loop = asyncio.new_event_loop()
+		else:
+			nest_asyncio.apply()
+			
 		if process=='main':
 			loop.run_until_complete(asyncio.wait([self.main()]))
 			self.display_results()
