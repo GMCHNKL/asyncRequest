@@ -70,6 +70,7 @@ if __name__ == '__main__':
 	# meta.covid_data().postIcmr()
 	# print(meta.finaldata)
 
-	fd = FileData('12.5.21',path='DataFolder\\May 1 to 27',end=10)
+	fd = FileData('12.5.21',path='DataFolder//May 1 to 27',end=10)
 	meta = MetaData([fd],results='all',page='edit')
 	meta.excel_dd().covid_data().postIcmr()
+# 7339374574

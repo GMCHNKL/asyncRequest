@@ -142,7 +142,7 @@ class FileData:
 
 
 if __name__ == '__main__':
-	fd = FileData('27.5.21',path='DataFolder\\May 1 to 27')
+	fd = FileData('27.5.21',path='DataFolder//May 1 to 27')
 	print(fd.date)
 	print(fd.filenames)
 	

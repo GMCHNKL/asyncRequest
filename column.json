@@ -1,0 +1,38 @@
+{
+    "patient_id": [
+        "covid number",
+        "sid no"
+    ],
+    "sample_cdate": [
+        "sample date",
+        "date"
+    ],
+    "sample_tdate": [
+        "date of result"
+    ],
+    "patient_name": [
+        "name",
+        "p name",
+        "GANESAN"
+    ],
+    "age": [
+        "age"
+    ],
+    "gender": [
+        "sex"
+    ],
+    "address": [
+        "complete address",
+        "address"
+    ],
+    "contact_number": [
+        "mobile number"
+    ],
+    "srf_id": [
+        "srf id"
+    ],
+    "final_result_of_sample": [
+        "result",
+        "report"
+    ]
+}

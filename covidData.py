@@ -91,6 +91,7 @@ class CovidData:
 		self.validateGender()
 		self.validateNumber()
 		self.validateAddress()
+		print('validateSrf:')
 		self.validateSrf()
 		self.assignResult()
 		self.assignDate()
@@ -169,15 +170,19 @@ class CovidData:
 
 	def validateSrf(self):
 		srf = removePunctuations(self.srf_id)
-		if isnull(srf) or not isinstance(srf,int):
+		srf = re.sub('\D*','',srf)
+		print(srf)
+		if isnull(srf):
+			print(isnull(srf),isinstance(srf,int))
 			self.srf_id = ''
 			return ''
 		n = int(srf)
-		if comparelen(srf, 'lte', 13):
+		if len(srf)<=13:
 			prefix = 3358000000000
 			if n+prefix < 3359000000000:
 				srf = n+prefix
-		else: srf = ''
+		else: 
+			srf = ''
 		self.srf_id = srf
 		return srf
 	
@@ -239,9 +244,9 @@ class CovidData:
 if __name__ == '__main__':
 	
 	p1 = CovidData(datadict={'patient_id':'C147586','sample_cdate':'3.5.2021',
-	'sample_tdate':'4.5.21','final_result_of_sample':'Negative'},page= 'edit')
+	'sample_tdate':'4.5.21','srf_id':'9101y','final_result_of_sample':'Negative'},page= 'edit')
 	# read = ReadExcel()
 	# read.getList('NAME ')
 	print('rdrp_confirmatory:',p1.rdrp_confirmatory)
 	p1.prittydata()
-	# print(p1.getdatadict())
+	print(p1.getdatadict())

@@ -7,38 +7,42 @@ import traceback
 import re
 import os
 from basedir import BaseDir
+import json
 
 class ReadExcel:
 	df = pd.DataFrame()
 	patientdf = pd.DataFrame()
 	fdlist = []
 	
-	matchcol = {
-		'patient_id' :['COVID NUMBER','sid no'],
-		'sample_cdate' :['SAMPLE DATE','date'],
-		'sample_tdate':['DATE OF RESULT'],
-		'patient_name' :['NAME','p name'],
-		'age' :['AGE'],
-		'gender' :['SEX'],
-		'address' :['COMPLETE ADDRESS','address'],
-		'contact_number' :['MOBILE NUMBER'],
-		'srf_id' :['SRF ID'],
-		'final_result_of_sample' :['RESULT','report'],
+	# matchcol = {
+	# 	'patient_id' :['COVID NUMBER','sid no'],
+	# 	'sample_cdate' :['SAMPLE DATE','date'],
+	# 	'sample_tdate':['DATE OF RESULT'],
+	# 	'patient_name' :['NAME','p name'],
+	# 	'age' :['AGE'],
+	# 	'gender' :['SEX'],
+	# 	'address' :['COMPLETE ADDRESS','address'],
+	# 	'contact_number' :['MOBILE NUMBER'],
+	# 	'srf_id' :['SRF ID'],
+	# 	'final_result_of_sample' :['RESULT','report'],
 		
-	}
+	# }
 
 	def __init__(self, fdlist=[], columns=[],results='all',page='add_record'):
 		if len(fdlist):
 			self.fdlist = fdlist
 		else:
 			self.fdlist = [FileData()]
+		with open('column.json') as json_data:
+			self.matchcol = json.load(json_data)
+		print(self.matchcol)
 		if len(columns):
 			self.columns = columns
 		self.matchcol = {key:list(map(lambda val:str(val).strip().lower(),value)) for key,value in self.matchcol.items()}
 		self.results = results
 		self.page = page
 		self.dflist = []
-		self.processedDataPath = BaseDir+'DataFolder\\Processed'
+		self.processedDataPath = BaseDir+'DataFolder//Processed'
 
 	def getSlice(self, fd, df):
 		start, end = fd.start, fd.end
@@ -90,7 +94,11 @@ class ReadExcel:
 			print(collist)
 			for nfd in not_found:
 				crt = input('Enter alternative for {} :'.format(nfd))
+				self.matchcol[nfd].append(crt)
+				print(self.matchcol)
 				finded[crt] = nfd
+			with open('column.json','w') as data:
+				json.dump(self.matchcol,data)
 		return {key:value for key,value in finded.items() if value}
 
 	def readExcelData(self,fname):
@@ -180,7 +188,7 @@ class ReadExcel:
 
 
 if __name__ == '__main__':
-	fd = FileData('10.5.21',path='DataFolder/May 1 to 27')
+	fd = FileData('10.5.21',path='DataFolder//May 1 to 27',end=10)
 	read = ReadExcel([fd],page='edit')
 	df = read.readDataList()
 	# read.vaidateColumnsByName(df)
