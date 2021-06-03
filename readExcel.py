@@ -13,20 +13,6 @@ class ReadExcel:
 	df = pd.DataFrame()
 	patientdf = pd.DataFrame()
 	fdlist = []
-	
-	# matchcol = {
-	# 	'patient_id' :['COVID NUMBER','sid no'],
-	# 	'sample_cdate' :['SAMPLE DATE','date'],
-	# 	'sample_tdate':['DATE OF RESULT'],
-	# 	'patient_name' :['NAME','p name'],
-	# 	'age' :['AGE'],
-	# 	'gender' :['SEX'],
-	# 	'address' :['COMPLETE ADDRESS','address'],
-	# 	'contact_number' :['MOBILE NUMBER'],
-	# 	'srf_id' :['SRF ID'],
-	# 	'final_result_of_sample' :['RESULT','report'],
-		
-	# }
 
 	def __init__(self, fdlist=[], columns=[],results='all',page='add_record'):
 		if len(fdlist):
@@ -35,7 +21,6 @@ class ReadExcel:
 			self.fdlist = [FileData()]
 		with open('column.json') as json_data:
 			self.matchcol = json.load(json_data)
-		print(self.matchcol)
 		if len(columns):
 			self.columns = columns
 		self.matchcol = {key:list(map(lambda val:str(val).strip().lower(),value)) for key,value in self.matchcol.items()}
@@ -101,8 +86,13 @@ class ReadExcel:
 				json.dump(self.matchcol,data)
 		return {key:value for key,value in finded.items() if value}
 
-	def readExcelData(self,fname):
-		return pd.read_excel(fname, header=1)
+	def readExcelData(self,fname,type="excel"):
+		if not os.path.isfile(fname):
+			return pd.DataFrame()
+		if type=="excel":
+			return pd.read_excel(fname, header=1)
+		elif type=="csv":
+			return pd.read_csv(fname)
 
 	def fileExist(self,fpath):
 		return os.path.isfile(fpath)
@@ -188,7 +178,7 @@ class ReadExcel:
 
 
 if __name__ == '__main__':
-	fd = FileData('10.5.21',path='DataFolder//May 1 to 27',end=10)
+	fd = FileData(path='DataFolder//May 1 to 27')
 	read = ReadExcel([fd],page='edit')
 	df = read.readDataList()
 	# read.vaidateColumnsByName(df)

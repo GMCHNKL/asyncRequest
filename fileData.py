@@ -18,7 +18,9 @@ class FileData:
 		self.validFileName()
 		filearr = self.getFiles()
 		filearr.sort()
-		constrain = {'first':[filearr[0]],'end':[filearr[-1]],'all':filearr}
+		constrain={'first':[],'end':[],'all':[]}
+		if len(filearr):
+			constrain = {'first':[filearr[0]],'end':[filearr[-1]],'all':filearr}
 		self.filenames = []
 		self.datelist = []
 		if str(sdate) in list(constrain.keys()):
@@ -32,7 +34,7 @@ class FileData:
 			for fname in filenames:
 				self.filenames.append(self.getFileName(fname))
 		print(self.filenames)
-		if len(self.filenames)==0:
+		if len(self.filenames)==0 and sdate:
 			if isinstance(sdate,str):
 				if sdate and edate:
 					sdate = self.assignDates(sdate,edate)
@@ -113,7 +115,7 @@ class FileData:
 
 	def setFileNames(self):
 		filelist = self.getFiles()
-		if len(self.filenames)==0:
+		if len(self.filenames)==0 and len(self.datelist):
 			print('Selecting by dates:')
 			datelist=  self.datelist
 			self.datelist = []
@@ -126,23 +128,27 @@ class FileData:
 				print('No files where selected')
 				return False
 			return True
-		else:
+		elif len(self.filenames):
 			filenames = self.filenames
 			self.filenames = []
+			self.datelist = []
 			for f in filenames:
 				for fl in filelist:
 					if f!='' and f.find(fl)>=0:
 						self.filenames.append(f)
+						fd,md = self.string_date(fname=f)
+						self.datelist.append(md)
 			if len(self.filenames)==0:
 				print('No files where selected')
 				return False
-		return True
+			return True
+		return False
 
 	
 
 
 if __name__ == '__main__':
-	fd = FileData('27.5.21',path='DataFolder//May 1 to 27')
+	fd = FileData(['27.5.21','30.5.21'],path='DataFolder//May 1 to 27')
 	print(fd.date)
 	print(fd.filenames)
-	
+	print(fd.datelist)

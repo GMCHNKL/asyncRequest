@@ -91,7 +91,6 @@ class CovidData:
 		self.validateGender()
 		self.validateNumber()
 		self.validateAddress()
-		print('validateSrf:')
 		self.validateSrf()
 		self.assignResult()
 		self.assignDate()
@@ -171,9 +170,7 @@ class CovidData:
 	def validateSrf(self):
 		srf = removePunctuations(self.srf_id)
 		srf = re.sub('\D*','',srf)
-		print(srf)
 		if isnull(srf):
-			print(isnull(srf),isinstance(srf,int))
 			self.srf_id = ''
 			return ''
 		n = int(srf)

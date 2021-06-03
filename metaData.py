@@ -1,8 +1,12 @@
+from basedir import BaseDir
 from datetime import datetime
 from readExcel import ReadExcel
 from covidData import CovidData
 from fileData import FileData
 from icmrData import IcmrData
+from collections import defaultdict
+import pandas as pd
+import os
 
 class MetaData:
 	fdlist = []
@@ -19,6 +23,7 @@ class MetaData:
 		self.results = results
 		self.datacount = datacount
 		self.covidresult = {}
+		self.covidresultlist = []
 
 	def addfdlist(self,fd):
 		self.fdlist.append(fd)
@@ -40,17 +45,21 @@ class MetaData:
 	
 	def covid_data(self):
 		for datadict in self.excel_data_list:
+			length = 0
+			covidresult = {}
 			for _,dd in datadict.items():
 				cd = CovidData(dd,self.page)
 				self.addcdlist(cd)
-				try:
-					self.covidresult[cd.final_result_of_sample]+=1
-				except:
-					self.covidresult[cd.final_result_of_sample]=1
 				datadict = cd.getdatadict()
 				if datadict:
+					try:
+						covidresult[cd.final_result_of_sample]+=1
+					except:
+						covidresult[cd.final_result_of_sample]=1
+					length +=1
 					self.finaldata.append(datadict)
-			
+			covidresult['Total count'] = length
+			self.covidresultlist.append(covidresult)
 		return self
 	
 	def postIcmr(self):
@@ -58,6 +67,23 @@ class MetaData:
 		icmr.create_event_loop()
 		for key,value in self.covidresult.items():
 			print(key,":",value)
+		logfilepath = BaseDir+'LogFile//'+str(datetime.now().strftime("%B.%Y"))+'.xlsx'
+		read = ReadExcel()
+		df = read.readExcelData(logfilepath)
+		# data = defaultdict(list)
+		for fdate,covidresult in zip(self.fdlist[0].datelist,self.covidresultlist):
+			data = {}
+			data["Data"] = str(datetime.now().strftime('%d-%m-%Y'))
+			data['Time'] = str(datetime.now().strftime('%I:%M:%S %p'))
+			data["filename"]= fdate
+			data['page'] = self.page
+			for key,result in covidresult.items():
+				data[str(key).upper()] = result
+			print(data)
+			# dictdf = pd.DataFrame(data=data)
+			df = df.append(data,ignore_index=True)
+		print(df)														
+		df.to_excel(logfilepath,startrow=1,index=False)
 		return self
 	
 
@@ -70,7 +96,7 @@ if __name__ == '__main__':
 	# meta.covid_data().postIcmr()
 	# print(meta.finaldata)
 
-	fd = FileData('12.5.21',path='DataFolder//May 1 to 27',end=10)
+	fd = FileData('11.5.21',path='DataFolder//May 1 to 27',end=10)
 	meta = MetaData([fd],results='all',page='edit')
 	meta.excel_dd().covid_data().postIcmr()
 # 7339374574
